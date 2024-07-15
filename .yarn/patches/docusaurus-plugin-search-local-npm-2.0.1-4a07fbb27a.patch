@@ -1,13 +1,63 @@
-diff --git a/lib/server/utils/scanDocuments.js b/lib/server/utils/scanDocuments.js
-index 6b5d8bfa646c2cdf6be383bdbe46a782c539c10c..97177eae076da24a919dfdfad0f5a55c5d82a71f 100644
+diff --git a/src/server/utils/__snapshots__/getIndexHash.test.ts.snap b/src/server/utils/__snapshots__/getIndexHash.test.ts.snap
+index 8a26158..467df44 100644
+--- a/lib/server/utils/__snapshots__/getIndexHash.test.ts.snap
++++ b/lib/server/utils/__snapshots__/getIndexHash.test.ts.snap
+@@ -6,6 +6,6 @@ exports[`getIndexHash > getIndexHash({"hashed":true,"indexBlog":true,"blogDir":[
+ 
+ exports[`getIndexHash > getIndexHash({"hashed":true,"indexDocs":true,"docsDir":["/does-not-exist/docs"]}) should return '1' 1`] = `null`;
+ 
+-exports[`getIndexHash > getIndexHash({"hashed":true,"indexDocs":true,"docsDir":["/tmp/docs"]}) should return '0' 1`] = `"9de0582a"`;
++exports[`getIndexHash > getIndexHash({"hashed":true,"indexDocs":true,"docsDir":["/tmp/docs"]}) should return '0' 1`] = `"c9c4419d"`;
+ 
+ exports[`getIndexHash > getIndexHash({"hashed":true,"indexDocs":true,"docsDir":["/tmp/index.js"]}) should return '1' 1`] = `null`;
+diff --git a/src/server/utils/scanDocuments.ts b/src/server/utils/scanDocuments.ts
+index 2890e79..ed3e362 100644
 --- a/lib/server/utils/scanDocuments.js
-+++ b/lib/server/utils/scanDocuments.js
-@@ -12,6 +12,17 @@ let nextDocId = 0;
- const getNextDocId = () => {
-     return (nextDocId += 1);
- };
++++ a/lib/server/utils/scanDocuments.js
+@@ -42,23 +42,35 @@ export async function scanDocuments(
+       });
+ 
+       for (const section of sections) {
++        const slicedHash = getSlicedHash(section.hash, url);
 +
-+function getSlicedHash(hash, url) {
+         if (section.title !== pageTitle) {
++
++          if (typeof slicedHash === 'boolean' && slicedHash === false) {
++            continue;
++          }
++
+           headingDocuments.push({
+             i: getNextDocId(),
+             t: section.title,
+             u: url,
+-            h: section.hash,
++            h: slicedHash,
+             p: titleId,
+           });
+         }
+ 
+         if (section.content) {
++
++          if (typeof slicedHash === 'boolean' && slicedHash === false) {
++            continue;
++          }
++
+           contentDocuments.push({
+             i: getNextDocId(),
+             t: section.content,
+             s: section.title || pageTitle,
+             u: url,
+-            h: section.hash,
++            h: slicedHash,
+             p: titleId,
+           });
+         }
+@@ -67,3 +79,13 @@ export async function scanDocuments(
+   );
+   return allDocuments;
+ }
++
++function getSlicedHash(hash: string, url: string) {
 +  if (hash.includes("#") && !hash.startsWith("#")) {
 +    if (hash.startsWith(url) && hash[url.length] === "#") {
 +      return hash.slice(url.length);
@@ -16,30 +66,3 @@ index 6b5d8bfa646c2cdf6be383bdbe46a782c539c10c..97177eae076da24a919dfdfad0f5a55c
 +  }
 +  return hash;
 +}
-+
- async function scanDocuments(DocInfoWithFilePathList) {
-     const titleDocuments = [];
-     const headingDocuments = [];
-@@ -29,7 +40,12 @@ async function scanDocuments(DocInfoWithFilePathList) {
-             b: breadcrumb,
-         });
-         for (const section of sections) {
-+            const slicedHash = getSlicedHash(section.hash, url);
-+
-             if (section.title !== pageTitle) {
-+                if (typeof slicedHash === 'boolean' && slicedHash === false) {
-+                    continue;
-+                }
-                 headingDocuments.push({
-                     i: getNextDocId(),
-                     t: section.title,
-@@ -39,6 +55,9 @@ async function scanDocuments(DocInfoWithFilePathList) {
-                 });
-             }
-             if (section.content) {
-+                if (typeof slicedHash === 'boolean' && slicedHash === false) {
-+                    continue;
-+                }
-                 contentDocuments.push({
-                     i: getNextDocId(),
-                     t: section.content,
