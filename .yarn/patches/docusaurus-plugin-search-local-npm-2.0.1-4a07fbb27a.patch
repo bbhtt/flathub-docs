@@ -1,7 +1,15 @@
+commit 6e0c6ebcaeb42ef246901a3d0f24e0b563c62a35
+Author:     bbhtt <bbhtt.zn0i8@slmail.me>
+AuthorDate: Mon Jul 15 08:29:32 2024 +0530
+Commit:     bbhtt <bbhtt.zn0i8@slmail.me>
+CommitDate: Mon Jul 15 10:00:12 2024 +0530
+
+    Fix search links for Docusaurus 3.4.0
+
 diff --git a/src/server/utils/__snapshots__/getIndexHash.test.ts.snap b/src/server/utils/__snapshots__/getIndexHash.test.ts.snap
 index 8a26158..467df44 100644
---- a/lib/server/utils/__snapshots__/getIndexHash.test.ts.snap
-+++ b/lib/server/utils/__snapshots__/getIndexHash.test.ts.snap
+--- a/src/server/utils/__snapshots__/getIndexHash.test.ts.snap
++++ b/src/server/utils/__snapshots__/getIndexHash.test.ts.snap
 @@ -6,6 +6,6 @@ exports[`getIndexHash > getIndexHash({"hashed":true,"indexBlog":true,"blogDir":[
  
  exports[`getIndexHash > getIndexHash({"hashed":true,"indexDocs":true,"docsDir":["/does-not-exist/docs"]}) should return '1' 1`] = `null`;
@@ -11,14 +19,15 @@ index 8a26158..467df44 100644
  
  exports[`getIndexHash > getIndexHash({"hashed":true,"indexDocs":true,"docsDir":["/tmp/index.js"]}) should return '1' 1`] = `null`;
 diff --git a/src/server/utils/scanDocuments.ts b/src/server/utils/scanDocuments.ts
-index 2890e79..ed3e362 100644
---- a/lib/server/utils/scanDocuments.js
-+++ a/lib/server/utils/scanDocuments.js
-@@ -42,23 +42,35 @@ export async function scanDocuments(
+index 2890e79..c5a6d6d 100644
+--- a/src/server/utils/scanDocuments.ts
++++ b/src/server/utils/scanDocuments.ts
+@@ -42,23 +42,36 @@ export async function scanDocuments(
        });
  
        for (const section of sections) {
 +        const slicedHash = getSlicedHash(section.hash, url);
++        console.log(slicedHash)
 +
          if (section.title !== pageTitle) {
 +
@@ -52,13 +61,13 @@ index 2890e79..ed3e362 100644
              p: titleId,
            });
          }
-@@ -67,3 +79,13 @@ export async function scanDocuments(
+@@ -67,3 +80,13 @@ export async function scanDocuments(
    );
    return allDocuments;
  }
 +
 +function getSlicedHash(hash: string, url: string) {
-+  if (hash.includes("#") && !hash.startsWith("#")) {
++  if (hash && hash.includes("#") && !hash.startsWith("#")) {
 +    if (hash.startsWith(url) && hash[url.length] === "#") {
 +      return hash.slice(url.length);
 +    }
