@@ -16,7 +16,7 @@ const config = {
   url: "https://docs.flathub.org",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: "/",
+  baseUrl: "/flathub-docs",
 
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
